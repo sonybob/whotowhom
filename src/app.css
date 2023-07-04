@@ -9,20 +9,24 @@ body {
     padding: 1em;
     position: absolute;
     top: 30%;
-    left: 25%;
-    margin-right: -50%;
+    left: 20%;
+    right: 20%;
+    /* margin-right: -50%; */
+
     /* transform: translate(-50%, -50%); */
     display: block;
 }
 #conteinerUsers {
+    margin: auto;
     background: #c9c9ff;
     color: #000000;
     border-radius: 1em;
     padding: 1em;
     position: absolute;
     top: 10%;
-    left: 30%;
-    margin-right: -50%;
+    left: 20%;
+    right: 20%;
+    /* margin-right: -50%; */
     /* transform: translate(-50%, -50%); */
     display: none;
 }

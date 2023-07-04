@@ -1,11 +1,11 @@
 const group = [];
-let nameGroup = "";
+let nameGroup = {};
 
 function addUser() {
     let userName = document.getElementById("name").value;
     let userCosts = parseFloat(document.getElementById("costs").value);
-    if (!userName || !userCosts) {
-        alert("Введіть ім'я i сумму");
+    if (!userName || isNaN(userCosts)) {
+        alert("Введіть ім'я i сумму коректно");
         return;
     }
     group.push({
@@ -21,7 +21,7 @@ function addUser() {
 function addUserToTable() {
     let tableOfUsers = document.getElementById("UserTable");
     tableOfUsers.innerHTML = "";
-    tableOfUsers.innerHTML = `<tr><th colspan="2">${nameGroup}</th><tr><th>Ім'я</th><th>Сумма</th></tr></tr>`;
+    tableOfUsers.innerHTML = `<tr><th colspan="2">${nameGroup.name} - ${nameGroup.dateGroup}</th><tr><th>Ім'я</th><th>Сумма</th></tr></tr>`;
 
     for (let i = 0; i < group.length; i++) {
         let row = document.createElement("tr");
@@ -44,52 +44,86 @@ function createNameGroupe() {
         alert("Але ж ви не ввели нічого...");
         return;
     } else {
-        nameGroup = document.getElementById("inputNameGroup").value;
+        nameGroup.name = document.getElementById("inputNameGroup").value;
+        nameGroup.dateGroup = new Intl.DateTimeFormat("uk-UA").format(
+            new Date()
+        );
+        console.log(nameGroup.dateGroup);
+
         document.getElementById("conteinerUsers").style.display = "block";
         document.getElementById("conteinerGroup").style.display = "none";
     }
 }
 
 function calculateDebts() {
-    const totalExpenses = group.reduce((sum, user) => sum + user.expenses, 0);
-    const averageExpense = totalExpenses / group.length;
-    const balances = [];
+    const totalExpense = group.reduce(
+        (sum, expense) => sum + expense.expenses,
+        0
+    );
 
-    group.forEach((user) => {
-        balances.push({
-            name: user.name,
-            expenses: averageExpense - user.expenses,
-        });
+    const numParticipants = group.length;
+    const averageExpense = totalExpense / numParticipants;
+
+    const debtors = [];
+    const creditors = [];
+
+    group.forEach((expense) => {
+        const difference = expense.expenses - averageExpense;
+
+        if (difference > 0) {
+            debtors.push({
+                name: expense.name,
+                amount: difference,
+            });
+        } else if (difference < 0) {
+            creditors.push({
+                name: expense.name,
+                amount: -difference,
+            });
+        }
+    });
+
+    const transactions = [];
+
+    debtors.forEach((debtor) => {
+        while (debtor.amount > 0) {
+            const creditor = creditors[0];
+            const transactionAmount = Math.min(debtor.amount, creditor.amount);
+
+            transactions.push({
+                to: debtor.name,
+                from: creditor.name,
+                amount: transactionAmount,
+            });
+
+            debtor.amount -= transactionAmount;
+            creditor.amount -= transactionAmount;
+
+            if (creditor.amount === 0) {
+                creditors.shift();
+            }
+        }
     });
 
     let tableOfUsers = document.getElementById("finalUserTable");
     tableOfUsers.innerHTML = "";
-    tableOfUsers.innerHTML = `<tr><th colspan="2">Загальна сума: ${totalExpenses}, по ${averageExpense} з кожного</th></tr>`;
+    tableOfUsers.innerHTML = `<tr><th colspan="2">Загальна сума: ${totalExpense}, по ${averageExpense} з кожного</th></tr>`;
 
-    for (let i = 0; i < balances.length; i++) {
+    transactions.forEach((transaction) => {
         let row = document.createElement("tr");
-        let res = "";
-        if (balances[i].expenses > 0) {
-            res = "виннен";
-        } else if (balances[i].expenses < 0) {
-            res = "винні";
-        } else {
-            res = " не має боргів";
-        }
-
         let nameCell = document.createElement("td");
-        nameCell.textContent = `${balances[i].name} ${res}`;
+        nameCell.textContent = `${transaction.from} має виплатити ${transaction.amount} для ${transaction.to}`;
         row.appendChild(nameCell);
-        let costCell = document.createElement("td");
-        costCell.textContent = balances[i].expenses;
-        row.appendChild(costCell);
         tableOfUsers.appendChild(row);
-    }
-
-    localStorage.setItem(`${nameGroup}`, JSON.stringify(balances));
+    });
+    localStorage.setItem(
+        `${nameGroup.name} - ${nameGroup.dateGroup}`,
+        JSON.stringify(transactions)
+    );
     document.getElementById("print").style.display = "inline-block";
 }
 
+//_______________________________________________________________________________________________________
 function getHistory() {
     document.getElementById("output").innerHTML = "";
 
@@ -113,15 +147,8 @@ function getHistory() {
 
             data.forEach((item) => {
                 const itemElement = document.createElement("p");
-                if (item.expenses > 0) {
-                    costs = "винен";
-                } else if (item.expenses < 0) {
-                    costs = "винні";
-                } else {
-                    costs = "немає боргів";
-                }
 
-                itemElement.textContent = `${item.name}, ${costs}: ${item.expenses}`;
+                itemElement.textContent = `${item.from} має виплатити ${item.amount} для ${item.to}`;
                 container.appendChild(itemElement);
             });
             document.getElementById("clearHistory").style.display = "block";
