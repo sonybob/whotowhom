@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/src/app.css" />
+        <title>Who to whom</title>
+    </head>
+
+    <body>
+        <div id="conteinerGroup">
+            Веедіть назву для створення паті:
+            <input id="inputNameGroup" type="text" />
+            <button id="createGroupeButton">Створити паті</button>
+            <button id="historyButton">Історія</button>
+            <div id="output"></div>
+            <button id="clearHistory">Видалити історію</button>
+        </div>
+
+        <div id="conteinerUsers">
+            <div class="conteinerInput">
+                Введіть імя:
+                <input id="name" type="text" alt="Імʼя" /> Введіть суму:
+                <input id="costs" type="number" alt="Сума" />
+                <button id="addUser">Добавити користувача</button>
+            </div>
+            <table id="UserTable"></table>
+
+            <table id="finalUserTable"></table>
+            <button id="calculateDebtsB">Розрахувати баланс</button>
+            <button id="print" onclick="window.print()">Печатати</button>
+        </div>
+
+        <script src="./src/app.js" type="module"></script>
+    </body>
+</html>
